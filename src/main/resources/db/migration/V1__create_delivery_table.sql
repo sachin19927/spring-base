@@ -6,5 +6,3 @@ CREATE TABLE deliveries (
                             status VARCHAR(32) NOT NULL
 );
 
-CREATE INDEX idx_deliveries_started_at ON deliveries (started_at, id);
-

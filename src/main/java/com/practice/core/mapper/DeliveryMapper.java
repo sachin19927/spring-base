@@ -7,8 +7,5 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface DeliveryMapper {
-
     DeliveryResponse toResponse(Delivery delivery);
-
-    Delivery toEntity(DeliveryRequest deliveryRequest);
 }

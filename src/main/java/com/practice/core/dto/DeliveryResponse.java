@@ -12,6 +12,8 @@ public record DeliveryResponse(
         String vehicleId,
         String address,
         Instant startedAt,
-        DeliveryStatus status
+        DeliveryStatus status,
+        Instant finishedAt
+
 ) {
 }

@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/delivery")
+@RequestMapping("/v1/deliveries")
 @RequiredArgsConstructor
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
 
     @PostMapping
-    public ResponseEntity<DeliveryResponse> createDelviery(@Valid @RequestBody DeliveryRequest deliveryRequest){
+    public ResponseEntity<DeliveryResponse> createDelivery(@Valid @RequestBody DeliveryRequest deliveryRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(deliveryService.createDelivery(deliveryRequest));
     }
 
