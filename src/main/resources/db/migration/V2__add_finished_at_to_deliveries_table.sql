@@ -1,0 +1,1 @@
+ALTER TABLE deliveries ADD COLUMN finished_at TIMESTAMP WITH TIME ZONE;

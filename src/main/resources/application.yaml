@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: spring-base
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/deliverydb}
+    username: ${SPRING_DATASOURCE_USERNAME:delivery}
+    password: ${SPRING_DATASOURCE_PASSWORD:delivery}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  flyway:
+    enabled: true
+    validate-on-migrate: true
+
+
