@@ -1,13 +1,12 @@
 package com.practice.core.execption;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
-
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.lang.Nullable;
 
 public final class ApiProblemDetailsFactory {
     private static final String ERROR_CODE = "errorCode";
@@ -17,8 +16,7 @@ public final class ApiProblemDetailsFactory {
     private static final String REQUEST_TO_HEADER = "X-Request-Id";
     private static final String TRACE_ID_ATTRIBUTE = "traceId";
 
-    private ApiProblemDetailsFactory() {
-    }
+    private ApiProblemDetailsFactory() {}
 
     public static ProblemDetail create(
             HttpStatus status,
@@ -26,9 +24,8 @@ public final class ApiProblemDetailsFactory {
             String title,
             String detail,
             String errorCode,
-            HttpServletRequest request){
+            HttpServletRequest request) {
         return create(status, type, title, detail, errorCode, request, null);
-
     }
 
     public static ProblemDetail create(
@@ -38,8 +35,7 @@ public final class ApiProblemDetailsFactory {
             String detail,
             String errorCode,
             HttpServletRequest request,
-            @Nullable List<ApiFieldError> fieldErrors
-            ){
+            @Nullable List<ApiFieldError> fieldErrors) {
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
         problemDetail.setType(type.toUri());
@@ -68,5 +64,4 @@ public final class ApiProblemDetailsFactory {
         }
         return request.getRequestId();
     }
-
 }

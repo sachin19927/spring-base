@@ -17,5 +17,43 @@ spring:
   flyway:
     enabled: true
     validate-on-migrate: true
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 
+server:
+  shutdown: graceful
 
+info:
+  app:
+    name: ${spring.application.name}
+    version: ${project.version}
+
+  level:
+    root: INFO
+    org.practice.core: INFO
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  structured:
+    format:
+      console: ecs

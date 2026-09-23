@@ -8,14 +8,12 @@ import com.practice.core.execption.ResourceNotFoundException;
 import com.practice.core.mapper.DeliveryMapper;
 import com.practice.core.model.ErrorCode;
 import com.practice.core.repository.DeliveryRepository;
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
 @Service
@@ -33,22 +31,22 @@ public class DeliveryService {
                 deliveryRequest.address(),
                 deliveryRequest.startedAt(),
                 deliveryRequest.status(),
-                deliveryRequest.finishedAt()
-        );
+                deliveryRequest.finishedAt());
         Delivery savedDelivery = deliveryRepository.save(delivery);
         return deliveryMapper.toResponse(savedDelivery);
     }
 
     @Transactional(readOnly = true)
-    public DeliveryResponse getDelivery(UUID id){
-        Delivery delivery = deliveryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.DELIVERY_NOT_FOUND,"Delivery not found"));
+    public DeliveryResponse getDelivery(UUID id) {
+        Delivery delivery = deliveryRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.DELIVERY_NOT_FOUND, "Delivery not found"));
         return deliveryMapper.toResponse(delivery);
     }
 
-    private void validateDelivery(DeliveryRequest request){
-        if(request.startedAt().isAfter(Instant.now(clock))) {
+    private void validateDelivery(DeliveryRequest request) {
+        if (request.startedAt().isAfter(Instant.now(clock))) {
             throw new BusinessValidationException(ErrorCode.STARTED_AT_IN_FUTURE, "Started at cannot be in the future");
         }
     }
-
 }

@@ -4,12 +4,10 @@ import com.practice.core.execption.BusinessValidationException;
 import com.practice.core.model.DeliveryStatus;
 import com.practice.core.model.ErrorCode;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.time.Instant;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
@@ -38,7 +36,8 @@ public class Delivery {
     @Column
     private Instant finishedAt;
 
-    public static Delivery create(String vehicleId, String address, Instant startedAt, DeliveryStatus status, Instant finishedAt) {
+    public static Delivery create(
+            String vehicleId, String address, Instant startedAt, DeliveryStatus status, Instant finishedAt) {
         Delivery delivery = new Delivery();
         delivery.vehicleId = vehicleId;
         delivery.address = address;
@@ -49,7 +48,7 @@ public class Delivery {
         return delivery;
     }
 
-    private void validateState(){
+    private void validateState() {
 
         if (vehicleId == null || vehicleId.isBlank()) {
             throw new BusinessValidationException(ErrorCode.VEHICLE_ID_REQUIRED, "vehicleId required");
@@ -60,19 +59,22 @@ public class Delivery {
         if (startedAt == null) {
             throw new BusinessValidationException(ErrorCode.STARTED_AT_REQUIRED, "startedAt at required");
         }
-        if (status == null){
-            throw  new BusinessValidationException(ErrorCode.STATUS_REQUIRED, "Delivery status is required");
+        if (status == null) {
+            throw new BusinessValidationException(ErrorCode.STATUS_REQUIRED, "Delivery status is required");
         }
         if (status == DeliveryStatus.DELIVERED && finishedAt == null) {
-            throw new BusinessValidationException(ErrorCode.DELIVERY_FINISHED_AT_REQUIRED, "finishedAt is required when status is DELIVERED");
+            throw new BusinessValidationException(
+                    ErrorCode.DELIVERY_FINISHED_AT_REQUIRED, "finishedAt is required when status is DELIVERED");
         }
 
         if (status == DeliveryStatus.IN_PROGRESS && finishedAt != null) {
-            throw new BusinessValidationException(ErrorCode.DELIVERY_FINISHED_AT_NOT_ALLOWED, "finishedAt must be null when status is IN_PROGRESS");
+            throw new BusinessValidationException(
+                    ErrorCode.DELIVERY_FINISHED_AT_NOT_ALLOWED, "finishedAt must be null when status is IN_PROGRESS");
         }
 
         if (finishedAt != null && finishedAt.isBefore(startedAt)) {
-            throw new BusinessValidationException(ErrorCode.FINISHED_AT_BEFORE_STARTED_AT, "finishedAt cannot be before startedAt");
+            throw new BusinessValidationException(
+                    ErrorCode.FINISHED_AT_BEFORE_STARTED_AT, "finishedAt cannot be before startedAt");
         }
     }
 }

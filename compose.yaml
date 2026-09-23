@@ -14,6 +14,13 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+  mock-api:
+    image: "wiremock/wiremock:3.5.2"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings
+    entrypoint: ["/docker-entrypoint.sh", "--port=8000"]
 
 volumes:
   postgres_data:

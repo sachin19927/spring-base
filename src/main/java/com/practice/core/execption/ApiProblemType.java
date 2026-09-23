@@ -11,15 +11,14 @@ public enum ApiProblemType {
     DATA_INTEGRITY_VIOLATION("data-integrity-violation"),
     INTERNAL_SERVER_ERROR("internal-server-error");
 
-
     private static final String BASE_URI = "https://api.spring-base.local/promblems/";
     private final String path;
 
-    ApiProblemType(String path){
+    ApiProblemType(String path) {
         this.path = path;
     }
 
-    public URI toUri(){
+    public URI toUri() {
         return URI.create(BASE_URI + path);
     }
 }
