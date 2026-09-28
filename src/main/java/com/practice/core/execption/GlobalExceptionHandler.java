@@ -4,7 +4,6 @@ import com.practice.core.model.ErrorCode;
 import com.practice.core.observability.*;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Objects;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -120,8 +119,6 @@ public class GlobalExceptionHandler {
     }
 
     private void recordApiError(ErrorCode errorCode) {
-        recorder.increment(
-                MetricConstants.API_ERROR,
-                MetricTag.of(MetricTagKey.ERROR_TYPE, errorCode.name()));
+        recorder.increment(MetricConstants.API_ERROR, MetricTag.of(MetricTagKey.ERROR_TYPE, errorCode.name()));
     }
 }
