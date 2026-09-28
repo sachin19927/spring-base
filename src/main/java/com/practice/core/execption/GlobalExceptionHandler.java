@@ -1,8 +1,11 @@
 package com.practice.core.execption;
 
 import com.practice.core.model.ErrorCode;
+import com.practice.core.observability.*;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Objects;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,13 +18,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
+@RequiredArgsConstructor
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final MetricsRecorder recorder;
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ProblemDetail> handleMalformedRequest(
             HttpMessageNotReadableException ex, HttpServletRequest request) {
 
+        recordApiError(ErrorCode.MALFORMED_REQUEST);
         return ResponseEntity.badRequest()
                 .body(ApiProblemDetailsFactory.create(
                         HttpStatus.BAD_REQUEST,
@@ -38,6 +45,7 @@ public class GlobalExceptionHandler {
         var fieldErrors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> new ApiFieldError(error.getField(), Objects.requireNonNull(error.getDefaultMessage())))
                 .toList();
+        recordApiError(ErrorCode.VALIDATION_FAILED);
         return ResponseEntity.badRequest()
                 .body(ApiProblemDetailsFactory.create(
                         HttpStatus.BAD_REQUEST,
@@ -52,6 +60,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        recordApiError(ErrorCode.INVALID_REQUEST_PARAMETER);
         return ResponseEntity.badRequest()
                 .body(ApiProblemDetailsFactory.create(
                         HttpStatus.BAD_REQUEST,
@@ -68,6 +77,7 @@ public class GlobalExceptionHandler {
                 ? ApiProblemType.RESOURCE_NOT_FOUND
                 : ApiProblemType.BUSINESS_VALIDATION;
         String title = ex instanceof ResourceNotFoundException ? "Resource Not Found" : "Business validation Failed";
+        recordApiError(ex.getErrorCode());
         return ResponseEntity.badRequest()
                 .body(ApiProblemDetailsFactory.create(
                         HttpStatus.BAD_REQUEST,
@@ -83,6 +93,7 @@ public class GlobalExceptionHandler {
             DataIntegrityViolationException ex, HttpServletRequest request) {
 
         log.error("Data integrity violation while processing request {}", request.getRequestURI(), ex);
+        recordApiError(ErrorCode.DATA_INTEGRITY_VIOLATION);
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiProblemDetailsFactory.create(
                         HttpStatus.CONFLICT,
@@ -97,6 +108,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ProblemDetail> handleUnwantedException(Exception ex, HttpServletRequest request) {
 
         log.error("Unexpected error occurred while processing request {}", request.getRequestURI(), ex);
+        recordApiError(ErrorCode.INTERNAL_SERVER_ERROR);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiProblemDetailsFactory.create(
                         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -105,5 +117,11 @@ public class GlobalExceptionHandler {
                         "An unexpected error occurred",
                         ErrorCode.INTERNAL_SERVER_ERROR.name(),
                         request));
+    }
+
+    private void recordApiError(ErrorCode errorCode) {
+        recorder.increment(
+                MetricConstants.API_ERROR,
+                MetricTag.of(MetricTagKey.ERROR_TYPE, errorCode.name()));
     }
 }

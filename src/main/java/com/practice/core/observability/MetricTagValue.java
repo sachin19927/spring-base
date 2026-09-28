@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum MetricTagValue{
+public enum MetricTagValue {
     OUTCOME_SUCCESS("success"),
     OUTCOME_FAILURE("failure");
 

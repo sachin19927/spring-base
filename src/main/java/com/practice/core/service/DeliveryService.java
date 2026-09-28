@@ -10,16 +10,13 @@ import com.practice.core.model.DeliveryStatus;
 import com.practice.core.model.ErrorCode;
 import com.practice.core.observability.*;
 import com.practice.core.repository.DeliveryRepository;
+import io.micrometer.core.instrument.Timer;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
-
-import io.micrometer.core.instrument.Timer;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
 
 @AllArgsConstructor
 @Service
@@ -29,7 +26,6 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final Clock clock;
     private final MetricsRecorder recorder;
-
 
     @Transactional
     public DeliveryResponse createDelivery(DeliveryRequest deliveryRequest) {
@@ -44,13 +40,19 @@ public class DeliveryService {
                     deliveryRequest.finishedAt());
             Delivery savedDelivery = deliveryRepository.save(delivery);
             DeliveryResponse response = deliveryMapper.toResponse(savedDelivery);
+
             recordCreationSuccess(savedDelivery);
+            recorder.stopTimer(
+                    sample,
+                    MetricConstants.PROCESS_COMPLETION_DURATION,
+                    MetricTag.of(MetricTagKey.OUTCOME, MetricTagValue.OUTCOME_SUCCESS.name()));
 
-            recorder.stopTimer(sample,MetricConstants.PROCESS_COMPLETION_DURATION,MetricTag.of(MetricTagKey.OUTCOME, MetricTagValue.OUTCOME_SUCCESS.name()));
-
-            return  response;
-        } catch (RuntimeException ex){
-            recorder.stopTimer(sample,MetricConstants.PROCESS_COMPLETION_DURATION,MetricTag.of(MetricTagKey.OUTCOME, MetricTagValue.OUTCOME_FAILURE.name()));
+            return response;
+        } catch (RuntimeException ex) {
+            recorder.stopTimer(
+                    sample,
+                    MetricConstants.PROCESS_COMPLETION_DURATION,
+                    MetricTag.of(MetricTagKey.OUTCOME, MetricTagValue.OUTCOME_FAILURE.name()));
             throw ex;
         }
     }
@@ -64,18 +66,18 @@ public class DeliveryService {
     }
 
     private void validateDelivery(DeliveryRequest request) {
-        if (request.startedAt()!=null && request.startedAt().isAfter(Instant.now(clock))) {
+        if (request.startedAt() != null && request.startedAt().isAfter(Instant.now(clock))) {
             throw new BusinessValidationException(ErrorCode.STARTED_AT_IN_FUTURE, "Started at cannot be in the future");
         }
     }
 
-    private void recordCreationSuccess(Delivery savedDelivery){
+    private void recordCreationSuccess(Delivery savedDelivery) {
         recorder.increment(
                 MetricConstants.DELIVERY_CREATE,
-                MetricTag.of(MetricTagKey.STATUS, savedDelivery.getStatus().name()),MetricTag.of(MetricTagKey.OUTCOME, MetricTagValue.OUTCOME_SUCCESS.name()));
-        if(savedDelivery.getStatus() == DeliveryStatus.IN_PROGRESS){
-            recorder.increment(
-                    MetricConstants.DELIVERY_IN_PROGRESS);
+                MetricTag.of(MetricTagKey.STATUS, savedDelivery.getStatus().name()),
+                MetricTag.of(MetricTagKey.OUTCOME, MetricTagValue.OUTCOME_SUCCESS.name()));
+        if (savedDelivery.getStatus() == DeliveryStatus.IN_PROGRESS) {
+            recorder.increment(MetricConstants.DELIVERY_IN_PROGRESS);
         }
     }
 }

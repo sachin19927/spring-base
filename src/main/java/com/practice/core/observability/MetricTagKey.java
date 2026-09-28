@@ -14,4 +14,3 @@ public enum MetricTagKey {
 
     private final String key;
 }
-
