@@ -2,8 +2,8 @@ package com.practice.core.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -114,7 +114,7 @@ public class DeliveryControllerTest {
     @Test
     @DisplayName("Get /v1/deliveries should return 400 when request body is malformed")
     void testCreateDeliveryFailsWhenBodyMalformed() throws Exception {
-       //Act
+        // Act
         mockMvc.perform(post("/v1/deliveries")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{invalid json}"))
@@ -128,10 +128,10 @@ public class DeliveryControllerTest {
     @DisplayName("Get /v1/deliveries/{id} should return 200 when delivery response")
     void testGetDeliverySuccess() throws Exception {
 
-        //Arrange
+        // Arrange
         when(deliveryService.getDelivery(eq(deliveryId))).thenReturn(responseDto);
 
-        //Act
+        // Act
         mockMvc.perform(get("/v1/deliveries/{id}", deliveryId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(deliveryId.toString()))
@@ -139,7 +139,7 @@ public class DeliveryControllerTest {
                 .andExpect(jsonPath("$.address").value("Nadeermerstrat 13"))
                 .andExpect(jsonPath("$.status").value("IN_PROGRESS"));
 
-        //Assert
+        // Assert
         verify(deliveryService).getDelivery(deliveryId);
     }
 
@@ -147,16 +147,15 @@ public class DeliveryControllerTest {
     @DisplayName("Get /v1/deliveries/{id} should return 400 when delivery not found")
     void testGetDeliveryNotFound() throws Exception {
 
-        //Arrange
+        // Arrange
         UUID missingId = UUID.randomUUID();
         when(deliveryService.getDelivery(eq(missingId)))
-                .thenThrow(new ResourceNotFoundException(ErrorCode.DELIVERY_NOT_FOUND,"Delivery not found"));
+                .thenThrow(new ResourceNotFoundException(ErrorCode.DELIVERY_NOT_FOUND, "Delivery not found"));
 
-        //Act
-        mockMvc.perform(get("/v1/deliveries/{id}", missingId))
-                .andExpect(status().isBadRequest());
+        // Act
+        mockMvc.perform(get("/v1/deliveries/{id}", missingId)).andExpect(status().isBadRequest());
 
-        //Assert
+        // Assert
         verify(deliveryService).getDelivery(missingId);
     }
 
@@ -164,11 +163,10 @@ public class DeliveryControllerTest {
     @DisplayName("Get /v1/deliveries/{id} should return 400 when id is not a valid UUID")
     void testGetDeliveryFailsWhenIdInvalid() throws Exception {
 
-        //Act
-        mockMvc.perform(get("/v1/deliveries/{id}", "not-a-valid-uuid"))
-                .andExpect(status().isBadRequest());
+        // Act
+        mockMvc.perform(get("/v1/deliveries/{id}", "not-a-valid-uuid")).andExpect(status().isBadRequest());
 
-        //Assert
-        verify(deliveryService,never()).getDelivery(any());
+        // Assert
+        verify(deliveryService, never()).getDelivery(any());
     }
 }
